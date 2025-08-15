@@ -118,13 +118,13 @@ app.get("/", (req, res) => {
 // ---- Dummy Alumni Data ----
 // Each alum has: id, name, company, role, mentorId
 const alumni = [
-  { id: 1, name: "You", company: "ABC", role: "SWE", mentorId: 2 },
-  { id: 2, name: "Mentor 1", company: "Google", role: "Staff Eng", mentorId: 3 },
-  { id: 3, name: "Mentor 2", company: "Microsoft", role: "Principal Eng", mentorId: null },
-  { id: 4, name: "Mentee 1", company: "Amazon", role: "SDE1", mentorId: 1 },
-  { id: 5, name: "Mentee 2", company: "Meta", role: "SWE", mentorId: 1 },
-  { id: 6, name: "Mentee 3", company: "Netflix", role: "Engineer", mentorId: 1 },
-  { id: 7, name: "Mentee 4", company: "Uber", role: "Backend Dev", mentorId: 1 }
+  { id: 1, name: "You", company: "ABC", role: "SWE", mentorId: 2, passoutYear : 2024 },
+  { id: 2, name: "Mentor 1", company: "Google", role: "Staff Eng", mentorId: 3, passoutYear : 2024 },
+  { id: 3, name: "Mentor 2", company: "Microsoft", role: "Principal Eng", mentorId: null, passoutYear : 2024 },
+  { id: 4, name: "Mentee 1", company: "Amazon", role: "SDE1", mentorId: 1, passoutYear : 2024 },
+  { id: 5, name: "Mentee 2", company: "Meta", role: "SWE", mentorId: 1, passoutYear : 2024 },
+  { id: 6, name: "Mentee 3", company: "Netflix", role: "Engineer", mentorId: 1, passoutYear : 2024 },
+  { id: 7, name: "Mentee 4", company: "Uber", role: "Backend Dev", mentorId: 1, passoutYear : 2024 }
 ];
 
 // ---- API Endpoints ----
