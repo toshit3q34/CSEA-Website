@@ -307,38 +307,44 @@ const SAIL = () => {
 
         // Build the mentor chain by following mentorId recursively
         const buildMentorChain = (personId) => {
-            const mentors = [];
+            const mentorChain = [];
             let currentPersonId = personId;
             const visited = new Set(); // Prevent infinite loops
 
+            // Start with the current person and work our way up the mentor chain
             while (currentPersonId && !visited.has(currentPersonId)) {
                 visited.add(currentPersonId);
-                const person = alumni.find(p => p.id === currentPersonId);
                 
-                if (person && person.mentorId) {
-                    const mentor = alumni.find(m => m.id === person.mentorId);
+                const currentPerson = alumni.find(p => p.id === currentPersonId);
+                if (!currentPerson) break;
+
+                // If this person has a mentor, find the mentor and add them to the chain
+                if (currentPerson.mentorId) {
+                    const mentor = alumni.find(m => m.id === currentPerson.mentorId);
                     if (mentor) {
-                        mentors.push(mentor);
-                        currentPersonId = mentor.id;
+                        mentorChain.push(mentor);
+                        currentPersonId = mentor.id; // Continue with the mentor's mentor
                     } else {
-                        break;
+                        break; // Mentor not found in data
                     }
                 } else {
-                    break;
+                    break; // No more mentors
                 }
             }
             
-            return mentors;
+            return mentorChain;
         };
 
         const mentorChain = buildMentorChain(selectedPersonId);
         
         setConnections({
-            self: selectedPerson,
-            mentors: mentorChain
+            selectedPerson: selectedPerson,
+            mentorChain: mentorChain
         });
         
-        setCurrentCardIndex(mentorChain.length); // Start at selected person (mentors.length position)
+        // Start viewing from the selected person (last position in chain)
+        const totalChainLength = mentorChain.length + 1; // mentors + selected person
+        setCurrentCardIndex(totalChainLength - 1); // Start at selected person
     };
 
     const buildContactChain = () => {
@@ -346,15 +352,15 @@ const SAIL = () => {
         
         const chain = [];
         
-        // Add mentors (from most senior to immediate mentor)
-        if (connections.mentors && connections.mentors.length > 0) {
-            // Reverse to show most senior mentor first
-            chain.push(...connections.mentors.reverse());
+        // Add mentors in hierarchy order (most senior first)
+        // Create a copy and reverse it so we don't mutate the original array
+        if (connections.mentorChain && connections.mentorChain.length > 0) {
+            chain.push(...[...connections.mentorChain].reverse());
         }
         
-        // Add the selected person
+        // Add the selected person at the end (most junior in the chain)
         chain.push({
-            ...connections.self,
+            ...connections.selectedPerson,
             isSelected: true
         });
         
@@ -383,9 +389,20 @@ const SAIL = () => {
         
         // Determine the person's role in the hierarchy
         const chain = buildContactChain();
-        const personRole = person.isSelected ? "SELECTED" : 
-                          index === chain.length - 2 ? "IMMEDIATE MENTOR" : 
-                          "SENIOR MENTOR";
+        let personRole;
+        
+        if (person.isSelected) {
+            personRole = "SELECTED PERSON";
+        } else {
+            const mentorLevel = chain.length - index - 2; // Calculate how many levels up
+            if (mentorLevel === 0) {
+                personRole = "DIRECT MENTOR";
+            } else if (mentorLevel === 1) {
+                personRole = "SENIOR MENTOR";
+            } else {
+                personRole = `SENIOR MENTOR (Level ${mentorLevel + 1})`;
+            }
+        }
         
         return (
             <div style={{...contactCardStyle, background: gradient}}>
@@ -591,7 +608,7 @@ const SAIL = () => {
                     </div>
                 </div>
 
-                {/* Contact Cards - Only Mentors and Selected Person */}
+                {/* Contact Cards - Mentorship Chain */}
                 {connections && (
                     <div style={contactCardContainerStyle}>
                         <div style={cardNavigationStyle}>
@@ -612,7 +629,7 @@ const SAIL = () => {
                                     }
                                 }}
                             >
-                                ← Previous (Senior Mentor)
+                                ← Previous (Senior)
                             </button>
                             
                             <div style={{
@@ -626,7 +643,7 @@ const SAIL = () => {
                                     fontWeight: "700",
                                     color: "#1e293b"
                                 }}>
-                                    Mentorship Chain
+                                    Mentorship Hierarchy
                                 </span>
                                 <span style={{
                                     fontSize: "14px",
